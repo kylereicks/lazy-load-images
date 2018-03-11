@@ -64,7 +64,7 @@ function replace_images_with_placeholders( $content ) {
 		if ( empty( $attachment_id ) ) {
 			continue;
 		}
-		$svg_string = get_placeholder_svg( $attachment_id, $image_attr );
+		$svg_string = get_placeholder_svg( $attachment_id, $image_attr, apply_filters( 'lazy_load_images_svg_placeholder_style', 'color-block-grid', $image, $image_attr, $attachment_id ) );
 		if ( false === $svg_string ) {
 			continue;
 		}
