@@ -24,7 +24,7 @@ require_once trailingslashit( plugin_dir_path( __file__ ) ) . 'includes/image-fu
 // Register scripts.
 add_action(
 	'init', function() {
-		wp_register_script( 'lazy-load-images', plugins_url( 'lazy-load-images/assets/js/lazy-load-images.js' ), array(), VERSION, false );
+		wp_register_script( 'lazy-load-images', plugins_url( 'lazy-load-images/assets/js/lazy-load-images.min.js' ), array(), VERSION, false );
 	}
 );
 
