@@ -115,13 +115,13 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 			$grid          = get_post_meta( $attachment_id, 'grid', true );
 			$average_color = get_post_meta( $attachment_id, 'average-color', true );
 			if ( $grid ) {
-				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' viewBox="0 0 ' . absint( count( $grid ) ) . ' ' . absint( count( $grid[0] ) ) . '"' . ( ! empty( $average_color ) ? ' style="background:rgba(' . esc_attr( implode( ',', $average_color ) ) . ');"' : '' ) . '>' . implode(
+				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' viewBox="0 0 ' . absint( count( $grid ) ) . ' ' . absint( count( $grid[0] ) ) . '"' . ( ! empty( $average_color ) ? ' style="background:' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $average_color ) ) . ';"' : '' ) . '>' . implode(
 					'', array_map(
 						function( $row, $row_index ) {
 								return implode(
 									'', array_map(
 										function( $color, $column_index ) use ( $row_index ) {
-											return '<rect x="' . absint( $row_index ) . '" y="' . absint( $column_index ) . '" width="1" height="1" stroke="none" fill="rgba(' . esc_attr( implode( ',', $color ) ) . ')" />';
+											return '<rect x="' . absint( $row_index ) . '" y="' . absint( $column_index ) . '" width="1" height="1" stroke="none" fill="' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . '" />';
 										}, $row, array_keys( $row )
 									)
 								);
@@ -137,7 +137,7 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 				$svg_string   = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: linear-gradient(' . implode(
 					',', array_map(
 						function( $color, $index ) use ( $stripe_width ) {
-								return 'rgba(' . esc_attr( implode( ',', $color ) ) . ') ' . absint( $index * $stripe_width ) . '%,rgba(' . esc_attr( implode( ',', $color ) ) . ') ' . absint( ( $index + 1 ) * $stripe_width ) . '%';
+								return esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( $index * $stripe_width ) . '%,' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( ( $index + 1 ) * $stripe_width ) . '%';
 						}, $stripes, array_keys( $stripes )
 					)
 				) . ')"></svg>';
@@ -146,13 +146,13 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 		case 'average-color':
 			$color = get_post_meta( $attachment_id, 'average-color', true );
 			if ( $color ) {
-				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( implode( ',', $color ) ) . ');"></svg>';
+				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ');"></svg>';
 			}
 			break;
 		case 'average-grayscale':
 			$color = get_post_meta( $attachment_id, 'average-grayscale', true );
 			if ( $color ) {
-				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( implode( ',', $color ) ) . ');"></svg>';
+				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ');"></svg>';
 			}
 			break;
 	}

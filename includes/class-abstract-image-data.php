@@ -168,6 +168,69 @@ abstract class Abstract_Image_Data {
 	}
 
 	/**
+	 * Convert a three or six character hex string to an array of rgba values.
+	 *
+	 * @since 1.0.1
+	 * @access public
+	 *
+	 * @param string $hex_color A three or six character hex string.
+	 * @return array An array of rgba values. The alpha value will always be 1.
+	 */
+	public static function hex_string_to_rgba_array( $hex_color ) {
+		$hex_color_no_hash = sanitize_hex_color_no_hash( $hex_color );
+		$rgba              = array(
+			'r' => 0,
+			'g' => 0,
+			'b' => 0,
+			'a' => 1,
+		);
+		if ( $hex_color_no_hash ) {
+			if ( 3 === strlen( $hex_color_no_hash ) ) {
+				$rgba['r'] = hexdec( $hex_color_no_hash[0] . $hex_color_no_hash[0] );
+				$rgba['g'] = hexdec( $hex_color_no_hash[1] . $hex_color_no_hash[1] );
+				$rgba['b'] = hexdec( $hex_color_no_hash[2] . $hex_color_no_hash[2] );
+			} else {
+				$rgba['r'] = hexdec( substr( $hex_color_no_hash, 0, 2 ) );
+				$rgba['g'] = hexdec( substr( $hex_color_no_hash, 2, 2 ) );
+				$rgba['b'] = hexdec( substr( $hex_color_no_hash, 4, 2 ) );
+			}
+		}
+
+		return $rgba;
+	}
+
+	/**
+	 * Convert a three or six character hex string to an array of rgba values.
+	 *
+	 * @since 1.0.1
+	 * @access public
+	 *
+	 * @param mixed $color A hex color or rgba array.
+	 * @return string A array of rgba values.
+	 */
+	public static function get_rgba_css_string( $color ) {
+		$rgba_array = array(
+			'r' => 0,
+			'g' => 0,
+			'b' => 0,
+			'a' => 1,
+		);
+		if ( is_array( $color ) ) {
+			foreach ( $rgba_array as $channel => $value ) {
+				if ( ! $color[ $channel ] ) {
+					continue;
+				}
+				$rgba_array[ $channel ] = $color[ $channel ];
+			}
+		}
+		if ( sanitize_hex_color_no_hash( $color ) ) {
+			$rgba_array = self::hex_string_to_rgba_array( $color );
+		}
+
+		return 'rgba(' . absint( $rgba_array['r'] ) . ',' . absint( $rgba_array['g'] ) . ',' . absint( $rgba_array['b'] ) . ',' . floatval( $rgba_array['a'] ) . ')';
+	}
+
+	/**
 	 * Calculate the greatest common divisor.
 	 *
 	 * @since 1.0.0

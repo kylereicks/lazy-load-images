@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Lazy load images with an SVG placeholder",
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
-    "build": "babel --presets=env assets/js/lazy-load-images.js | uglifyjs --compress --mangle toplevel=true --output assets/js/lazy-load-images.min.js"
+    "build": "babel assets/js/lazy-load-images.js | uglifyjs --compress --mangle toplevel=true --output assets/js/lazy-load-images.min.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +19,10 @@
     "babel-preset-env": "^1.6.1",
     "uglify-js": "^3.3.14"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "babel": {
+    "presets": [
+      ["env"]
+    ]
+  }
 }

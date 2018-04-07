@@ -1,7 +1,7 @@
 /**
  * @summary   Lazy load images.
  *
- * @since     0.1.0
+ * @since     1.0.0
  */
  
 /**
@@ -9,19 +9,19 @@
  *
  * Initialize lazy loading.
  *
- * @since 0.1.0
+ * @since 1.0.0
  *
  * @param {event} event Event object.
  */
 const lazyLoadSetup = event => {
-	if ( window.IntersectionObserver ) {
+	if (  window.IntersectionObserver ) {
 
 		/**
 		 * @summary Intersection Observer.
 		 *
 		 * Watch image elements and load when they are in view.
 		 *
-		 * @since 0.1.0
+		 * @since 1.0.0
 		 */
 		const observer = new IntersectionObserver( function( entries ) {
 			entries.forEach( entry => {
@@ -50,7 +50,7 @@ const lazyLoadSetup = event => {
 					}
 					if ( preload.width ) {
 						imageLoadedHandler.call( preload );
-					}else if ( preload.addEventListener ) {
+					} else if ( preload.addEventListener ) {
 						preload.addEventListener( 'load', imageLoadedHandler  );
 					}
 				}
@@ -72,12 +72,14 @@ const lazyLoadSetup = event => {
  *
  * If we do not have an observer, load the images immediately.
  *
- * @since 0.1.0
+ * @since 1.0.0
  *
  * @param {event} event Optional. Event object.
  */
 fallback = event => {
-	[].forEach.call( document.getElementsByTagName( 'img' ), image => {
+	const images = document.getElementsByTagName( 'img' );
+	for ( let i = 0, imax = images.length; i < imax; i++ ) {
+		const image = images[i];
 		if ( image.hasAttribute( 'data-src' ) ) {
 			image.setAttribute( 'src', image.getAttribute( 'data-src' ) );
 		}
@@ -87,7 +89,7 @@ fallback = event => {
 		if ( image.hasAttribute( 'data-sizes' ) ) {
 			image.setAttribute( 'sizes', image.getAttribute( 'data-sizes' ) );
 		}
-	} );
+	}
 };
 
 // Run the lazyLoadSetup if the document is already loaded.
