@@ -3,7 +3,7 @@
  * Plugin Name: Lazy Load Images
  * Plugin URI: https://github.com/kylereicks/lazy-load-images
  * Description: Lazy load images, with a color block SVG placeholder.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Kyle Reicks
  * Author URI: https://github.com/kylereicks/
  *
@@ -24,7 +24,15 @@ require_once trailingslashit( plugin_dir_path( __file__ ) ) . 'includes/image-fu
 // Register scripts.
 add_action(
 	'init', function() {
-		wp_register_script( 'lazy-load-images', plugins_url( 'lazy-load-images/assets/js/lazy-load-images.min.js' ), array(), VERSION, false );
+		$dependencies = array();
+		// See https://github.com/kylereicks/wp-script-module-nomodule.
+		if ( function_exists( '\WordPress\Script\ModuleNoModule\add_module_nomodule' ) ) {
+			wp_register_script( 'lazy-load-images-es6', plugins_url( 'lazy-load-images/assets/js/lazy-load-images-es6.min.js' ), array(), VERSION, false );
+			wp_script_add_data( 'lazy-load-images-es6', 'type', 'module' );
+			$dependencies[] = 'lazy-load-images-es6';
+		}
+		wp_register_script( 'lazy-load-images', plugins_url( 'lazy-load-images/assets/js/lazy-load-images.min.js' ), $dependencies, VERSION, false );
+		wp_script_add_data( 'lazy-load-images', 'nomodule', true );
 	}
 );
 
