@@ -3,7 +3,7 @@
  * Plugin Name: Lazy Load Images
  * Plugin URI: https://github.com/kylereicks/lazy-load-images
  * Description: Lazy load images, with a color block SVG placeholder.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Kyle Reicks
  * Author URI: https://github.com/kylereicks/
  *

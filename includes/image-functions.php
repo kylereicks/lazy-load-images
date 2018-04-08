@@ -49,6 +49,9 @@ function save_image_color_data_as_post_meta( $attachment_id ) {
  * @return string HTML.
  */
 function replace_images_with_placeholders( $content ) {
+	if ( filter_input( INPUT_GET, 'noscript-load-images', FILTER_VALIDATE_BOOLEAN ) ) {
+		return $content;
+	}
 	if ( ! preg_match_all( '/<img [^>]+>/', $content, $matches ) ) {
 		return $content;
 	}
@@ -89,7 +92,7 @@ function replace_images_with_placeholders( $content ) {
 								return esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
 						}, array_keys( $image_attr ), $image_attr
 					)
-				) . ' />', $image, $image_attr, $svg_string
+				) . ' /><noscript><form><button name="noscript-load-images" value="true">Load Images</button></form></noscript>', $image, $image_attr, $svg_string
 			), $content
 		);
 	}
