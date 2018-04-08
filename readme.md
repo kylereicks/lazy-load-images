@@ -4,7 +4,6 @@ Lazy Load Images with SVG Placeholders
 Add SVG image placeholders for images and load the full image when it comes into view.
 
 ## Full image
-![Full Image]()
 <img alt="Full Image" title="Full Image" width="525" height="394" src="example-images/full-image.jpg" />
 
 ## Color Block Grid (Default)
