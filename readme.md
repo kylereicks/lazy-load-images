@@ -8,7 +8,7 @@ Add SVG image placeholders for images and load the full image when it comes into
 * Generate SVG placeholders with color data saved when the image is added or updated.
 * Use Intersection Observers to determine when an image is in view.
 * As a fallback load all images immediately when IntersectionObserver is not available.
-* Load ES6 scripts via sript type [module and nomodule](https://github.com/kylereicks/wp-script-module-nomodule).
+* Load ES6 scripts via script type [module and nomodule](https://github.com/kylereicks/wp-script-module-nomodule).
 
 # Examples
 
