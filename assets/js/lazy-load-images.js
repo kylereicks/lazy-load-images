@@ -93,7 +93,7 @@ fallback = event => {
 };
 
 // Run the lazyLoadSetup if the document is already loaded.
-if ( 'complete' === document.readyState ) {
+if ( 'complete' === document.readyState || 'interactive' === document.readyState ) {
 	lazyLoadSetup();
 
 // Else, wait for the DOM to finish loading.
