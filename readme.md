@@ -3,6 +3,15 @@ Lazy Load Images with SVG Placeholders
 
 Add SVG image placeholders for images and load the full image when it comes into view.
 
+## Key Features
+
+* Generate SVG placeholders with color data saved when the image is added or updated.
+* Use Intersection Observers to determine when an image is in view.
+* As a fallback load all images immediately when IntersectionObserver is not available.
+* Load ES6 scripts via sript type [module and nomodule](https://github.com/kylereicks/wp-script-module-nomodule).
+
+# Examples
+
 ## Full image
 <img alt="Full Image" title="Full Image" width="525" height="394" src="example-images/full-image.jpg" />
 
