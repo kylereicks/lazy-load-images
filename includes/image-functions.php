@@ -149,13 +149,13 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 		case 'average-color':
 			$color = get_post_meta( $attachment_id, 'average-color', true );
 			if ( $color ) {
-				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ');"></svg>';
+				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background:' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ';"></svg>';
 			}
 			break;
 		case 'average-grayscale':
 			$color = get_post_meta( $attachment_id, 'average-grayscale', true );
 			if ( $color ) {
-				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: rgba(' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ');"></svg>';
+				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background:' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ';"></svg>';
 			}
 			break;
 	}
