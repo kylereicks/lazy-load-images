@@ -10,6 +10,10 @@
 
 namespace LazyLoadImages\Functions\ImageView;
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 use \LazyLoadImages\Classes\Abstract_Image_Data as Abstract_Image_Data;
 
 /**

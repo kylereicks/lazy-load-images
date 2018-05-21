@@ -10,6 +10,11 @@
 
 namespace LazyLoadImages\Functions\ImageData;
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+
 use \LazyLoadImages\Classes\Image_Data_Imagick as Image_Data_Imagick;
 use \LazyLoadImages\Classes\Image_Data_GD as Image_Data_GD;
 

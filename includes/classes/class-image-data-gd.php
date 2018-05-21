@@ -10,6 +10,10 @@
 
 namespace LazyLoadImages\Classes;
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Image Data.
  *

@@ -10,6 +10,10 @@
 
 namespace LazyLoadImages\Classes;
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Memoize get trait.
  *
