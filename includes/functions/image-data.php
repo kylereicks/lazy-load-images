@@ -24,7 +24,7 @@ use \LazyLoadImages\Classes\Image_Data_GD as Image_Data_GD;
  */
 function save_image_color_data_as_post_meta( int $attachment_id ) {
 	$image_data = apply_filters( 'lazy_load_images_image_data_class', false, $attachment_id );
-	if ( false && false === $image_data && class_exists( '\Imagick' ) ) {
+	if ( false === $image_data && class_exists( '\Imagick' ) ) {
 		$image_data = new Image_Data_Imagick( $attachment_id );
 	} elseif ( false === $image_data && function_exists( 'gd_info' ) ) {
 		$image_data = new Image_Data_GD( $attachment_id );

@@ -43,7 +43,7 @@ require_once trailingslashit( plugin_dir_path( __file__ ) ) . 'includes/function
 
 // Register scripts.
 add_action(
-	'init', function() {
+	'init', function() : void {
 		$dependencies = array();
 		// See https://github.com/kylereicks/wp-script-module-nomodule.
 		if ( function_exists( '\WordPress\Script\ModuleNoModule\add_module_nomodule' ) ) {
