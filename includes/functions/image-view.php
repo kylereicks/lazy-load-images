@@ -33,7 +33,7 @@ function replace_images_with_placeholders( string $content ) : string {
 	}
 	foreach ( $images[0] as $image ) {
 		$attachment_id = null;
-		$image_attr    = preg_match_all( '/\s([\w-]+)([=\s]([\'\"])((?!\3).+?[^\\\])\3)?/', $image, $match_attr ) ? array_combine( array_map( 'esc_attr', $match_attr[1] ), array_map( 'esc_attr', $match_attr[4] ) ) : array();
+		$image_attr    = preg_match_all( '/\s([\w-]+)([=\s]([\'\"])((?!\3).+?[^\\\])\3)?/', $image, $match_attr ) ? array_combine( array_map( 'esc_attr', $match_attr[1] ), array_map( 'esc_attr', $match_attr[4] ) ) : [];
 		if ( ! empty( $image_attr['class'] ) && preg_match( '/wp-image-([0-9]+)/i', $image_attr['class'], $class_id ) ) {
 			$attachment_id = absint( $class_id[1] );
 		}
@@ -87,7 +87,7 @@ function replace_images_with_placeholders( string $content ) : string {
  * @param string  $style Optional. The style of the placeholder.
  * @return string SVG string.
  */
-function get_placeholder_svg( int $attachment_id, array $image_attr = array(), string $style = 'color-block-grid' ) : string {
+function get_placeholder_svg( int $attachment_id, array $image_attr = [], string $style = 'color-block-grid' ) : string {
 	$svg_string = '';
 	switch ( $style ) {
 		case 'color-block-grid':

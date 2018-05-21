@@ -44,10 +44,10 @@ require_once trailingslashit( plugin_dir_path( __file__ ) ) . 'includes/function
 // Register scripts.
 add_action(
 	'init', function() : void {
-		$dependencies = array();
+		$dependencies = [];
 		// See https://github.com/kylereicks/wp-script-module-nomodule.
 		if ( function_exists( '\WordPress\Script\ModuleNoModule\add_module_nomodule' ) ) {
-			wp_register_script( 'lazy-load-images-es6', plugins_url( 'lazy-load-images/assets/js/lazy-load-images-es6.min.js' ), array(), VERSION, false );
+			wp_register_script( 'lazy-load-images-es6', plugins_url( 'lazy-load-images/assets/js/lazy-load-images-es6.min.js' ), [], VERSION, false );
 			wp_script_add_data( 'lazy-load-images-es6', 'type', 'module' );
 			$dependencies[] = 'lazy-load-images-es6';
 		}

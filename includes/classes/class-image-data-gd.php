@@ -192,12 +192,12 @@ class Image_Data_GD extends Abstract_Image_Data implements Interface_Image_Data 
 		} elseif ( 0 < $rows && 0 === $columns ) {
 			$columns = round( $rows * ( $height / $width ) );
 		}
-		$color_array = array();
+		$color_array = [];
 		$image       = imagescale( $image, $rows, $columns );
 		$columns     = imagesx( $image );
 		$rows        = imagesy( $image );
 		for ( $i = 0; $i < $columns; $i++ ) {
-			$color_array[ $i ] = array();
+			$color_array[ $i ] = [];
 			for ( $j = 0; $j < $rows; $j++ ) {
 				$color_array[ $i ][ $j ] = self::get_pixel_rgba( $image, $i, $j );
 			}

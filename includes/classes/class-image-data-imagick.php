@@ -188,12 +188,12 @@ class Image_Data_Imagick extends Abstract_Image_Data implements Interface_Image_
 			$rows    = $max_width_height;
 			$columns = $max_width_height;
 		}
-		$color_array = array();
+		$color_array = [];
 		$image->scaleImage( $rows, $columns );
 		$columns = $image->getImageWidth();
 		$rows    = $image->getImageHeight();
 		for ( $i = 0; $i < $columns; $i++ ) {
-			$color_array[ $i ] = array();
+			$color_array[ $i ] = [];
 			for ( $j = 0; $j < $rows; $j++ ) {
 				$pixel                   = $image->getImagePixelColor( $i, $j );
 				$color_array[ $i ][ $j ] = $this->get_pixel_color_with_normalized_alpha_channel( $pixel );
