@@ -8,9 +8,7 @@
  * @since 1.0.0
  */
 
-namespace LazyLoadImages;
-
-require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includes/class-abstract-image-data.php';
+namespace LazyLoadImages\Classes;
 
 /**
  * Image Data.
@@ -21,22 +19,53 @@ require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includ
  *
  * @see \Imagick
  */
-class Image_Data_Imagick extends Abstract_Image_Data {
+class Image_Data_Imagick extends Abstract_Image_Data implements Interface_Image_Data {
+	use Trait_Memoize_Get;
 
 	/**
-	 * Constructor.
+	 * Image object.
 	 *
 	 * @since 1.0.0
-	 *
-	 * @param integer $attachment_id Attachment ID.
-	 * @return \LazyLoadImages\Image_Data Image_Data object.
+	 * @access protected
+	 * @var mixed $image Image object.
 	 */
-	public function __construct( $attachment_id = null ) {
-		if ( ! class_exists( '\Imagick' ) ) {
-			return;
-		}
-		return parent::__construct( $attachment_id );
-	}
+	protected $image = null;
+
+	/**
+	 * Average color RGBA value.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var string $average_color_rgba Average color rgba value.
+	 */
+	protected $average_color = null;
+
+	/**
+	 * Average grayscale RGBA value.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var string $average_grayscale_rgba Average grayscale rgba value.
+	 */
+	protected $average_grayscale = null;
+
+	/**
+	 * Array of rgba color arrays.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var array $horizontal_stripes Array of rgba color arrays.
+	 */
+	protected $horizontal_stripes = null;
+
+	/**
+	 * Array of arrays of rgba color arrays.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var array $grid Array of arrays of rgba color arrays.
+	 */
+	protected $grid = null;
 
 	/**
 	 * Get the Imagick image object.
@@ -47,36 +76,27 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 * @return \Imagick Imagick object.
 	 */
 	protected function get_image() {
-		if ( ! empty( $this->file ) ) {
-			return new \Imagick( $this->file );
+		if ( empty( $this->file ) ) {
+			return false;
 		}
-		return new \Imagick( trailingslashit( wp_upload_dir()['basedir'] ) . wp_get_attachment_metadata( $this->attachment_id )['file'] );
+		return new \Imagick( $this->file );
 	}
 
 	/**
-	 * Set average color.
-	 *
-	 * Retrieve the average color for the image.
+	 * Get pixel color rgba array.
 	 *
 	 * @since 1.0.0
 	 * @access protected
 	 *
-	 * @param boolean $grayscale Retrieve grayscale value.
-	 * @return mixed HEX color string or an array of rgba integer values.
+	 * @param \ImagickPixel $pixel Imagick pixel.
+	 * @return array Array of rgba integer values.
 	 */
-	protected function set_average_color( $grayscale = false ) {
-		$image = $this->get_image();
-		if ( true === $grayscale ) {
-			$image->modulateImage( 100, 0, 100 );
-		}
-		$image->scaleImage( 1, 1 );
-		$pixel = $image->getImagePixelColor( 0, 0 );
-		$rgba  = $pixel->getColor();
-		$rgba  = self::get_pixel_color_with_normalized_alpha_channel( $pixel );
-		if ( true === $grayscale ) {
-			$this->average_grayscale = $rgba;
+	protected function get_pixel_color_with_normalized_alpha_channel( \ImagickPixel $pixel ) : array {
+		$rgba = $pixel->getColor();
+		if ( $this->get_image()->getImageAlphaChannel() ) {
+			$rgba['a'] = $pixel->getColor( true )['a'];
 		} else {
-			$this->average_color = $rgba;
+			$rgba['a'] = 1;
 		}
 		return $rgba;
 	}
@@ -89,8 +109,14 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 *
 	 * @return array rgba color array.
 	 */
-	protected function get_average_color() {
-		return $this->set_average_color();
+	protected function get_average_color() : array {
+		$image = $this->get( 'image' );
+		if ( ! $image ) {
+			return [];
+		}
+		$image->scaleImage( 1, 1 );
+		$pixel = $image->getImagePixelColor( 0, 0 );
+		return $this->get_pixel_color_with_normalized_alpha_channel( $pixel );
 	}
 
 	/**
@@ -101,27 +127,15 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 *
 	 * @return array rgba grayscale array.
 	 */
-	protected function get_average_grayscale() {
-		return $this->set_average_color( true );
-	}
-
-	/**
-	 * Get pixel color rgba array.
-	 *
-	 * @since 1.0.0
-	 * @access protected
-	 *
-	 * @param \ImagickPixel $pixel Imagick pixel.
-	 * @return array Array of rgba integer values.
-	 */
-	protected function get_pixel_color_with_normalized_alpha_channel( $pixel ) {
-		$rgba = $pixel->getColor();
-		if ( $this->get_image()->getImageAlphaChannel() ) {
-			$rgba['a'] = $pixel->getColor( true )['a'];
-		} else {
-			$rgba['a'] = 1;
+	protected function get_average_grayscale() : array {
+		$image = $this->get( 'image' );
+		if ( ! $image ) {
+			return [];
 		}
-		return $rgba;
+		$image->modulateImage( 100, 0, 100 );
+		$image->scaleImage( 1, 1 );
+		$pixel = $image->getImagePixelColor( 0, 0 );
+		return $this->get_pixel_color_with_normalized_alpha_channel( $pixel );
 	}
 
 	/**
@@ -132,14 +146,14 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 *
 	 * @return array Array of rgba color arrays.
 	 */
-	protected function get_horizontal_stripes() {
+	protected function get_horizontal_stripes() : array {
 		$stripes     = 5;
-		$color_array = array();
+		$color_array = [];
 		$image       = $this->get_image();
 		$image->scaleImage( 1, $stripes );
 		for ( $i = 0; $i < $stripes; $i++ ) {
 			$pixel             = $image->getImagePixelColor( 0, $i );
-			$color_array[ $i ] = self::get_pixel_color_with_normalized_alpha_channel( $pixel );
+			$color_array[ $i ] = $this->get_pixel_color_with_normalized_alpha_channel( $pixel );
 		}
 		return $color_array;
 	}
@@ -152,7 +166,7 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 *
 	 * @return array Array of arrays of rgba color arrays.
 	 */
-	protected function get_grid() {
+	protected function get_grid() : array {
 		$max_width_height     = 16;
 		$min_max_width_height = 8;
 		$image                = $this->get_image();
@@ -182,7 +196,7 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 			$color_array[ $i ] = array();
 			for ( $j = 0; $j < $rows; $j++ ) {
 				$pixel                   = $image->getImagePixelColor( $i, $j );
-				$color_array[ $i ][ $j ] = self::get_pixel_color_with_normalized_alpha_channel( $pixel );
+				$color_array[ $i ][ $j ] = $this->get_pixel_color_with_normalized_alpha_channel( $pixel );
 			}
 		}
 		return $color_array;
@@ -196,7 +210,7 @@ class Image_Data_Imagick extends Abstract_Image_Data {
 	 *
 	 * @return array Average color value rgba array.
 	 */
-	public function average_color() {
+	public function average_color() : array {
 		return $this->get( 'average_color' );
 	}
 

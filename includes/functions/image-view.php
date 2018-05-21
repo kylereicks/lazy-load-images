@@ -2,39 +2,15 @@
 /**
  * Image functions
  *
+ * Moved from includes/image-functions.php
+ *
  * @package LazyLoadImages
- * @since 1.0.0
+ * @since 1.3.0
  */
 
-namespace LazyLoadImages;
+namespace LazyLoadImages\Functions\ImageView;
 
-require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includes/class-image-data-imagick.php';
-require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includes/class-image-data-gd.php';
-
-/**
- * Save image color data as post meta.
- *
- * Parse an attachment image and save color data as post meta.
- *
- * @since 1.0.0
- *
- * @see LazyLoadImages\Image_Data
- *
- * @param integer $attachment_id Attachment ID.
- */
-function save_image_color_data_as_post_meta( $attachment_id ) {
-	$image_data = apply_filters( 'lazy_load_images_image_data_class', false, $attachment_id );
-	if ( false === $image_data && class_exists( '\Imagick' ) ) {
-		$image_data = new Image_Data_Imagick( $attachment_id );
-	} elseif ( false === $image_data && function_exists( 'gd_info' ) ) {
-		$image_data = new Image_Data_GD( $attachment_id );
-	}
-	update_post_meta( $attachment_id, 'average-color', $image_data->average_color() );
-	update_post_meta( $attachment_id, 'average-grayscale', $image_data->average_grayscale() );
-	update_post_meta( $attachment_id, 'image-is-dark', $image_data->is_dark() );
-	update_post_meta( $attachment_id, 'horizontal-stripes', $image_data->color_stripes_horizontal() );
-	update_post_meta( $attachment_id, 'grid', $image_data->color_grid() );
-}
+use \LazyLoadImages\Classes\Abstract_Image_Data as Abstract_Image_Data;
 
 /**
  * Replace images with placeholders.
@@ -48,27 +24,27 @@ function save_image_color_data_as_post_meta( $attachment_id ) {
  * @param string $content HTML string.
  * @return string HTML.
  */
-function replace_images_with_placeholders( $content ) {
+function replace_images_with_placeholders( string $content ) : string {
 	if ( filter_input( INPUT_GET, 'noscript-load-images', FILTER_VALIDATE_BOOLEAN ) ) {
 		return $content;
 	}
-	if ( ! preg_match_all( '/<img [^>]+>/', $content, $matches ) ) {
+	if ( ! preg_match_all( '/<img [^>]+>/', $content, $images ) ) {
 		return $content;
 	}
-	foreach ( $matches[0] as $image ) {
+	foreach ( $images[0] as $image ) {
 		$attachment_id = null;
 		$image_attr    = preg_match_all( '/\s([\w-]+)([=\s]([\'\"])((?!\3).+?[^\\\])\3)?/', $image, $match_attr ) ? array_combine( array_map( 'esc_attr', $match_attr[1] ), array_map( 'esc_attr', $match_attr[4] ) ) : array();
 		if ( ! empty( $image_attr['class'] ) && preg_match( '/wp-image-([0-9]+)/i', $image_attr['class'], $class_id ) ) {
 			$attachment_id = absint( $class_id[1] );
 		}
-		if ( empty( $attachment_id ) ) {
+		if ( ! $attachment_id ) {
 			$attachment_id = url_to_attachment_id( $image_attr['src'] );
 		}
-		if ( empty( $attachment_id ) ) {
+		if ( ! $attachment_id ) {
 			continue;
 		}
 		$svg_string = get_placeholder_svg( $attachment_id, $image_attr, apply_filters( 'lazy_load_images_svg_placeholder_style', 'color-block-grid', $image, $image_attr, $attachment_id ) );
-		if ( false === $svg_string ) {
+		if ( ! $svg_string ) {
 			continue;
 		}
 		wp_enqueue_script( 'lazy-load-images' );
@@ -88,7 +64,7 @@ function replace_images_with_placeholders( $content ) {
 			$image, apply_filters(
 				'lazy_load_images_placeholder_image', '<img ' . implode(
 					' ', array_map(
-						function( $key, $value ) {
+						function( string $key, string $value ) : string {
 								return esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
 						}, array_keys( $image_attr ), $image_attr
 					)
@@ -111,7 +87,7 @@ function replace_images_with_placeholders( $content ) {
  * @param string  $style Optional. The style of the placeholder.
  * @return string SVG string.
  */
-function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'color-block-grid' ) {
+function get_placeholder_svg( int $attachment_id, array $image_attr = array(), string $style = 'color-block-grid' ) : string {
 	$svg_string = '';
 	switch ( $style ) {
 		case 'color-block-grid':
@@ -120,14 +96,14 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 			if ( $grid ) {
 				$svg_string = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' viewBox="0 0 ' . absint( count( $grid ) ) . ' ' . absint( count( $grid[0] ) ) . '"' . ( ! empty( $average_color ) ? ' style="background:' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $average_color ) ) . ';"' : '' ) . '>' . implode(
 					'', array_map(
-						function( $row, $row_index ) {
-								return implode(
-									'', array_map(
-										function( $color, $column_index ) use ( $row_index ) {
-											return '<rect x="' . absint( $row_index ) . '" y="' . absint( $column_index ) . '" width="1" height="1" stroke="none" fill="' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . '" />';
-										}, $row, array_keys( $row )
-									)
-								);
+						function( array $row, int $row_index ) : string {
+							return implode(
+								'', array_map(
+									function( array $color, int $column_index ) use ( $row_index ) : string {
+										return '<rect x="' . absint( $row_index ) . '" y="' . absint( $column_index ) . '" width="1" height="1" stroke="none" fill="' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . '" />';
+									}, $row, array_keys( $row )
+								)
+							);
 						}, $grid, array_keys( $grid )
 					)
 				) . '</svg>';
@@ -139,8 +115,8 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 				$stripe_width = 100 / count( $stripes );
 				$svg_string   = '<svg xmlns="http://www.w3.org/2000/svg"' . ( isset( $image_attr['width'] ) ? ' width="' . absint( $image_attr['width'] ) . '"' : '' ) . ( isset( $image_attr['height'] ) ? ' height="' . absint( $image_attr['height'] ) . '"' : '' ) . ' style="background: linear-gradient(' . implode(
 					',', array_map(
-						function( $color, $index ) use ( $stripe_width ) {
-								return esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( $index * $stripe_width ) . '%,' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( ( $index + 1 ) * $stripe_width ) . '%';
+						function( string $color, int $index ) use ( $stripe_width ) {
+							return esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( $index * $stripe_width ) . '%,' . esc_attr( Abstract_Image_Data::get_rgba_css_string( $color ) ) . ' ' . absint( ( $index + 1 ) * $stripe_width ) . '%';
 						}, $stripes, array_keys( $stripes )
 					)
 				) . ')"></svg>';
@@ -160,7 +136,7 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
 			break;
 	}
 	$svg_string = apply_filters( 'lazy_load_images_svg_placeholder', apply_filters( 'lazy_load_images_svg_placeholder_' . esc_attr( $style ), $svg_string, $attachment_id, $image_attr, $style ), $attachment_id, $image_attr, $style );
-	return ! empty( $svg_string ) ? $svg_string : false;
+	return $svg_string;
 }
 
 /**
@@ -175,12 +151,12 @@ function get_placeholder_svg( $attachment_id, $image_attr = array(), $style = 'c
  * @param string $image_url Image URL.
  * @return integer Attachment ID.
  */
-function url_to_attachment_id( $image_url ) {
+function url_to_attachment_id( string $image_url ) : string {
 	global $wpdb;
 	$original_image_url = $image_url;
 	$image_url          = preg_replace( '/^(.+?)(?:-e\d+)?(?:-\d+x\d+)?\.(jpg|jpeg|png|gif)(?:(?:\?|#).+)?$/i', '$1.$2', $image_url );
 	$cached_id          = wp_cache_get( md5( $image_url ), 'url_to_id' );
-	if ( ! empty( $cached_id ) ) {
+	if ( ! $cached_id ) {
 		return $cached_id;
 	}
 	$cached_id = wp_cache_get( md5( $original_image_url ), 'url_to_id', false, $found );
@@ -200,5 +176,5 @@ function url_to_attachment_id( $image_url ) {
 		}
 	}
 	wp_cache_set( md5( $original_image_url ), false, 'url_to_id' );
-	return false;
+	return '';
 }

@@ -100,5 +100,5 @@ if ( 'complete' === document.readyState || 'interactive' === document.readyState
 } else if ( document.addEventListener ) {
 	document.addEventListener( 'DOMContentLoaded', lazyLoadSetup ); 
 } else if ( document.attachEvent ) {
-	document.attachEvent( 'onload', lazyLoadSetup ); 
+	document.attachEvent( 'onload', fallback ); 
 }

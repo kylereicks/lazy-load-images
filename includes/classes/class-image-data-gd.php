@@ -8,9 +8,7 @@
  * @since 1.0.0
  */
 
-namespace LazyLoadImages;
-
-require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includes/class-abstract-image-data.php';
+namespace LazyLoadImages\Classes;
 
 /**
  * Image Data.
@@ -21,22 +19,53 @@ require_once trailingslashit( dirname( plugin_dir_path( __file__ ) ) ) . 'includ
  *
  * @see \gd_info
  */
-class Image_Data_GD extends Abstract_Image_Data {
+class Image_Data_GD extends Abstract_Image_Data implements Interface_Image_Data {
+	use Trait_Memoize_Get;
 
 	/**
-	 * Constructor.
+	 * Image object.
 	 *
 	 * @since 1.0.0
-	 *
-	 * @param integer $attachment_id Attachment ID.
-	 * @return \LazyLoadImages\Image_Data Image_Data object.
+	 * @access protected
+	 * @var mixed $image Image object.
 	 */
-	public function __construct( $attachment_id = null ) {
-		if ( ! function_exists( 'gd_info' ) ) {
-			return;
-		}
-		return parent::__construct( $attachment_id );
-	}
+	protected $image = null;
+
+	/**
+	 * Average color RGBA value.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var string $average_color_rgba Average color rgba value.
+	 */
+	protected $average_color = null;
+
+	/**
+	 * Average grayscale RGBA value.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var string $average_grayscale_rgba Average grayscale rgba value.
+	 */
+	protected $average_grayscale = null;
+
+	/**
+	 * Array of rgba color arrays.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var array $horizontal_stripes Array of rgba color arrays.
+	 */
+	protected $horizontal_stripes = null;
+
+	/**
+	 * Array of arrays of rgba color arrays.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @var array $grid Array of arrays of rgba color arrays.
+	 */
+	protected $grid = null;
 
 	/**
 	 * Get the GD image resource.
@@ -47,17 +76,15 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 * @return resource GD image resource.
 	 */
 	protected function get_image() {
-		if ( ! empty( $this->file ) ) {
-			$image_file = $this->file;
-		} else {
-			$image_file = trailingslashit( wp_upload_dir()['basedir'] ) . wp_get_attachment_metadata( $this->attachment_id )['file'];
+		if ( empty( $this->file ) ) {
+			return false;
 		}
-		$image_extension = strtolower( pathinfo( $image_file, PATHINFO_EXTENSION ) );
+		$image_extension = strtolower( pathinfo( $this->file, PATHINFO_EXTENSION ) );
 		if ( 'jpg' === $image_extension ) {
 			$image_extension = 'jpeg';
 		}
 		if ( function_exists( 'imagecreatefrom' . $image_extension ) ) {
-			return call_user_func_array( 'imagecreatefrom' . $image_extension, array( $image_file ) );
+			return call_user_func_array( 'imagecreatefrom' . $image_extension, array( $this->file ) );
 		}
 	}
 
@@ -72,7 +99,7 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 * @param integer  $y y pixel.
 	 * @return array Array of rgba values.
 	 */
-	public static function get_pixel_rgba( $image, $x = 0, $y = 0 ) {
+	public static function get_pixel_rgba( $image, int $x = 0, int $y = 0 ) : array {
 		$color_value          = imagecolorat( $image, $x, $y );
 		$red_green_blue_alpha = imagecolorsforindex( $image, $color_value );
 		return array(
@@ -84,32 +111,6 @@ class Image_Data_GD extends Abstract_Image_Data {
 	}
 
 	/**
-	 * Set average color.
-	 *
-	 * Retrieve the average color for the image.
-	 *
-	 * @since 1.0.0
-	 * @access protected
-	 *
-	 * @param boolean $grayscale Retrieve grayscale value.
-	 * @return mixed HEX color string or an array of rgba integer values.
-	 */
-	protected function set_average_color( $grayscale = false ) {
-		$image = $this->get_image();
-		if ( true === $grayscale ) {
-			imagefilter( $image, IMG_FILTER_GRAYSCALE );
-		}
-		$image = imagescale( $image, 1, 1 );
-		$rgba  = self::get_pixel_rgba( $image, 0, 0 );
-		if ( true === $grayscale ) {
-			$this->average_grayscale = $rgba;
-		} else {
-			$this->average_color = $rgba;
-		}
-		return $rgba;
-	}
-
-	/**
 	 * Retrieve average color rgba array.
 	 *
 	 * @since 1.0.0
@@ -117,8 +118,10 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 *
 	 * @return array rgba color array.
 	 */
-	protected function get_average_color() {
-		return $this->set_average_color();
+	protected function get_average_color() : array {
+		$image = $this->get_image();
+		$image = imagescale( $image, 1, 1 );
+		return self::get_pixel_rgba( $image, 0, 0 );
 	}
 
 	/**
@@ -129,8 +132,11 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 *
 	 * @return array rgba grayscale array.
 	 */
-	protected function get_average_grayscale() {
-		return $this->set_average_color( true );
+	protected function get_average_grayscale() : array {
+		$image = $this->get_image();
+		imagefilter( $image, IMG_FILTER_GRAYSCALE );
+		$image = imagescale( $image, 1, 1 );
+		return self::get_pixel_rgba( $image, 0, 0 );
 	}
 
 	/**
@@ -141,9 +147,9 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 *
 	 * @return array Array of hex color strings.
 	 */
-	protected function get_horizontal_stripes() {
+	protected function get_horizontal_stripes() : array {
 		$stripes     = 5;
-		$color_array = array();
+		$color_array = [];
 		$image       = $this->get_image();
 		$image       = imagescale( $image, 1, $stripes );
 		for ( $i = 0; $i < $stripes; $i++ ) {
@@ -160,7 +166,7 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 *
 	 * @return array Array of arrays of hex color strings.
 	 */
-	protected function get_grid() {
+	protected function get_grid() : array {
 		$max_width_height     = 16;
 		$min_max_width_height = 8;
 		$image                = $this->get_image();
@@ -232,7 +238,7 @@ class Image_Data_GD extends Abstract_Image_Data {
 	 * @return boolean Image is dark.
 	 */
 	public function is_dark() {
-		return self::color_is_dark( $this->get( 'average_color_rgba' ) );
+		return self::color_is_dark( $this->get( 'average_color' ) );
 	}
 
 	/**
